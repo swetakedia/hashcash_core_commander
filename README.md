@@ -1,9 +1,9 @@
-# StellarCoreCommander
+# HashcashCoreCommander
 
-A helper gem for scripting a [hashcash-core](https://github.com/stellar/stellar-core).  This gem provides a system of creating isolated test networks into which you can play
+A helper gem for scripting a [hashcash-core](https://github.com/hashcash/hcnet-core).  This gem provides a system of creating isolated test networks into which you can play
 transactions and record results.
 
-The motivation for this project comes from the testing needs of [horizon](https://github.com/hashcash/horizon).  Horizon uses `scc` to record the various testing scenarios that its suite uses.
+The motivation for this project comes from the testing needs of [aurora](https://github.com/hashcash/aurora).  Aurora uses `scc` to record the various testing scenarios that its suite uses.
 
 
 ## Installation
@@ -30,7 +30,7 @@ At present `scc` makes a few assumptions about the environment it runs in that y
 2.  The `which` command is available on your system.
 3.  Postgresql is running and the current user has passwordless access to it.  Running `psql postgres -c "\l"` should confirm you're setup correctly.
 4.  Your current user has access to create and drop postgres databases.  Test using: `createdb foobar && dropdb foobar`
-5.  A working `hashcash-core` binary is available on your path (or specified using the `--stellar-core-bin` flag)
+5.  A working `hashcash-core` binary is available on your path (or specified using the `--hashcash-core-bin` flag)
 6.  Your system has libsodium installed
 
 
@@ -67,7 +67,7 @@ The next statement is more complex: `payment :master, :scott, [:native, 1000_000
 
 ### Recipe Reference
 
-All recipe execute within the context of a `StellarCoreCommander::Transactor`.  [See the code for all available methods](lib/hashcash_core_commander/transactor.rb).
+All recipe execute within the context of a `HashcashCoreCommander::Transactor`.  [See the code for all available methods](lib/hashcash_core_commander/transactor.rb).
 
 ## Example Recipes
 
