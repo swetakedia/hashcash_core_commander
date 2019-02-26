@@ -23,9 +23,9 @@ ask contributors to follow so that we can merge your changes quickly.
 ## Submitting Changes
 
 * <a href="https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form">Sign the Contributor License Agreement</a>.
-* All content, comments, and pull requests must follow the [Stellar Community Guidelines](https://www.stellar.org/community-guidelines/). 
+* All content, comments, and pull requests must follow the [Stellar Community Guidelines](https://www.hashcash.org/community-guidelines/). 
 * Push your changes to a topic branch in your fork of the repository.
-* Submit a pull request to the [stellar_core_commander repository](https://github.com/stellar/stellar-tutorials) in the Stellar organization.
+* Submit a pull request to the [hashcash_core_commander repository](https://github.com/hashcash/hashcash-tutorials) in the Stellar organization.
  * Include a descriptive [commit message](https://github.com/erlang/otp/wiki/Writing-good-commit-messages).
  * Changes contributed via pull request should focus on a single issue at a time.
  * Rebase your local changes against the master branch. Resolve any conflicts that arise.
@@ -43,12 +43,12 @@ an issue number.
 
 # Additional Resources
 
-* [Bug tracker (Github)](https://github.com/stellar/stellar_core_commander/issues)
+* [Bug tracker (Github)](https://github.com/hashcash/hashcash_core_commander/issues)
 * <a href="https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form">Contributor License Agreement</a>
-* [Explore the API](http://docs.stellarhorizon.apiary.io/)
-* [Readme for stellar_core_commander](https://github.com/stellar/stellar_core_commander/blob/master/README.md)
-* #stellar-dev IRC channel on freenode.org
-* #dev channel on [Slack](http://slack.stellar.org)
+* [Explore the API](http://docs.hashcashaurora.apiary.io/)
+* [Readme for hashcash_core_commander](https://github.com/hashcash/hashcash_core_commander/blob/master/README.md)
+* #hashcash-dev IRC channel on freenode.org
+* #dev channel on [Slack](http://slack.hashcash.org)
 
 
 This document is inspired by:

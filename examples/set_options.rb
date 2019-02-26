@@ -7,7 +7,7 @@ create_account :bartek
 
 close_ledger
 
-kp = Stellar::KeyPair.random
+kp = Hcnet::KeyPair.random
 
 set_inflation_dest :scott, :bartek
 set_flags :scott, [:auth_required_flag]

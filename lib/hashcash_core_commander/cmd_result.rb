@@ -1,4 +1,4 @@
-module StellarCoreCommander
+module HcnetCoreCommander
   class CmdResult
     include Contracts
 

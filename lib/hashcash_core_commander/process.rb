@@ -3,7 +3,7 @@ require 'socket'
 require 'timeout'
 require 'csv'
 
-module StellarCoreCommander
+module HcnetCoreCommander
 
   class UnexpectedDifference < StandardError
     def initialize(kind, x, y)
@@ -38,40 +38,40 @@ module StellarCoreCommander
 
     SPECIAL_PEERS = {
       :testnet1 => {
-        :dns => "core-testnet1.stellar.org",
+        :dns => "core-testnet1.hashcash.org",
         :key => "GDKXE2OZMJIPOSLNA6N6F2BVCI3O777I2OOC4BV7VOYUEHYX7RTRYA7Y",
         :name => "core_testnet_001",
-        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.stellar.org/prd/core-testnet/%s/{0} -O {1}"
+        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.hashcash.org/prd/core-testnet/%s/{0} -O {1}"
       },
       :testnet2 => {
-        :dns => "core-testnet2.stellar.org",
+        :dns => "core-testnet2.hashcash.org",
         :key => "GCUCJTIYXSOXKBSNFGNFWW5MUQ54HKRPGJUTQFJ5RQXZXNOLNXYDHRAP",
         :name => "core_testnet_002",
-        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.stellar.org/prd/core-testnet/%s/{0} -O {1}"
+        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.hashcash.org/prd/core-testnet/%s/{0} -O {1}"
       },
       :testnet3 => {
-        :dns => "core-testnet3.stellar.org",
+        :dns => "core-testnet3.hashcash.org",
         :key => "GC2V2EFSXN6SQTWVYA5EPJPBWWIMSD2XQNKUOHGEKB535AQE2I6IXV2Z",
         :name => "core_testnet_003",
-        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.stellar.org/prd/core-testnet/%s/{0} -O {1}"
+        :get => "wget -q https://s3-eu-west-1.amazonaws.com/history.hashcash.org/prd/core-testnet/%s/{0} -O {1}"
       },
       :pubnet1 => {
-        :dns => "core-live4.stellar.org",
+        :dns => "core-live4.hashcash.org",
         :key => "GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH",
         :name => "core_live_001",
-        :get => "curl -sf http://history.stellar.org/prd/core-live/%s/{0} -o {1}"
+        :get => "curl -sf http://history.hashcash.org/prd/core-live/%s/{0} -o {1}"
       },
       :pubnet2 => {
-        :dns => "core-live5.stellar.org",
+        :dns => "core-live5.hashcash.org",
         :key => "GCM6QMP3DLRPTAZW2UZPCPX2LF3SXWXKPMP3GKFZBDSF3QZGV2G5QSTK",
         :name => "core_live_002",
-        :get => "curl -sf http://history.stellar.org/prd/core-live/%s/{0} -o {1}"
+        :get => "curl -sf http://history.hashcash.org/prd/core-live/%s/{0} -o {1}"
       },
       :pubnet3 => {
-        :dns => "core-live6.stellar.org",
+        :dns => "core-live6.hashcash.org",
         :key => "GABMKJM6I25XI4K7U6XWMULOUQIQ27BCTMLS6BYYSOWKTBUXVRJSXHYQ",
         :name => "core_live_003",
-        :get => "curl -sf http://history.stellar.org/prd/core-live/%s/{0} -o {1}"
+        :get => "curl -sf http://history.hashcash.org/prd/core-live/%s/{0} -o {1}"
       }
     }
 
@@ -80,7 +80,7 @@ module StellarCoreCommander
       working_dir:         String,
       name:                Symbol,
       base_port:           Num,
-      identity:            Stellar::KeyPair,
+      identity:            Hcnet::KeyPair,
       quorum:              ArrayOf[Symbol],
       peers:               Maybe[ArrayOf[Symbol]],
       history_peers:       Maybe[ArrayOf[Symbol]],
@@ -135,7 +135,7 @@ module StellarCoreCommander
       @keep_database      = params[:keep_database]
       @debug              = params[:debug]
       @wait_timeout       = params[:wait_timeout] || 10
-      @network_passphrase = params[:network_passphrase] || Stellar::Networks::TESTNET
+      @network_passphrase = params[:network_passphrase] || Hcnet::Networks::TESTNET
       @protocol_version   = params[:protocol_version] || "latest"
       @delay_upgrade      = params[:delay_upgrade] || false
 
@@ -283,16 +283,16 @@ module StellarCoreCommander
 
     Contract None => Any
     def wait_for_ready
-      $stderr.puts "waiting #{sync_timeout} seconds for stellar-core #{idname} ( catchup_complete: #{@catchup_complete}, catchup_recent: #{@catchup_recent}, special_peers: #{has_special_peers?} )"
+      $stderr.puts "waiting #{sync_timeout} seconds for hcnet-core #{idname} ( catchup_complete: #{@catchup_complete}, catchup_recent: #{@catchup_recent}, special_peers: #{has_special_peers?} )"
       Timeout.timeout(sync_timeout) do
         loop do
           break if synced? || (!await_sync? && !booting?)
           raise Process::Crash, "process #{name} has crashed while waiting for being #{await_sync? ? 'synced' : 'ready'}" if crashed?
-          $stderr.puts "waiting until stellar-core #{idname} is #{await_sync? ? 'synced' : 'ready'} (state: #{info_field 'state'}, SCP quorum: #{scp_quorum_num}, Status: #{info_status})"
+          $stderr.puts "waiting until hcnet-core #{idname} is #{await_sync? ? 'synced' : 'ready'} (state: #{info_field 'state'}, SCP quorum: #{scp_quorum_num}, Status: #{info_status})"
           sleep 1
         end
       end
-      $stderr.puts "Wait is over! stellar-core #{idname} is #{await_sync? ? 'synced' : 'ready'} (state: #{info_field 'state'}, SCP quorum: #{scp_quorum_num}, Status: #{info_status})"
+      $stderr.puts "Wait is over! hcnet-core #{idname} is #{await_sync? ? 'synced' : 'ready'} (state: #{info_field 'state'}, SCP quorum: #{scp_quorum_num}, Status: #{info_status})"
     end
 
     Contract None => Bool
@@ -643,25 +643,25 @@ module StellarCoreCommander
 
       if body["status"] == "ERROR"
         xdr = Convert.from_base64(body["error"])
-        result = Stellar::TransactionResult.from_xdr(xdr)
+        result = Hcnet::TransactionResult.from_xdr(xdr)
         raise "transaction on #{idname} failed: #{result.inspect}"
       end
 
     end
 
-    Contract Stellar::KeyPair => Any
+    Contract Hcnet::KeyPair => Any
     def account_row(account)
       row = database[:accounts].where(:accountid => account.address).first
       raise "Missing account in #{idname}'s database: #{account.address}" unless row
       row
     end
 
-    Contract Stellar::KeyPair => Num
+    Contract Hcnet::KeyPair => Num
     def sequence_for(account)
       @sequences[account]
     end
 
-    Contract Stellar::KeyPair => Num
+    Contract Hcnet::KeyPair => Num
     def balance_for(account)
       (account_row account)[:balance]
     end

@@ -1,5 +1,5 @@
 require 'bigdecimal'
-module StellarCoreCommander
+module HcnetCoreCommander
 
   class TransactionBuilder
     include Contracts
@@ -35,16 +35,16 @@ module StellarCoreCommander
       thresholds:     Maybe[Thresholds],
       master_weight:  Maybe[MasterWeightByte],
       home_domain:    Maybe[String],
-      signer:         Maybe[Stellar::Signer],
+      signer:         Maybe[Hcnet::Signer],
     }
 
-    SignerSpec = Or[Stellar::KeyPair]
+    SignerSpec = Or[Hcnet::KeyPair]
 
-    StellarBaseAsset = Or[[Symbol, String, Stellar::KeyPair], [:native]]
+    HcnetBaseAsset = Or[[Symbol, String, Hcnet::KeyPair], [:native]]
 
-    MAX_LIMIT= BigDecimal.new((2**63)-1) / Stellar::ONE
+    MAX_LIMIT= BigDecimal.new((2**63)-1) / Hcnet::ONE
 
-    Contract Or[Transactor,HorizonCommander] => Any
+    Contract Or[Transactor,AuroraCommander] => Any
     def initialize(transactor)
       @transactor = transactor
     end
@@ -80,9 +80,9 @@ module StellarCoreCommander
       tx =  if options[:with]
               attrs[:with] = normalize_amount(options[:with])
               attrs[:path] = options[:path].map{|p| make_asset p}
-              Stellar::Transaction.path_payment(attrs)
+              Hcnet::Transaction.path_payment(attrs)
             else
-              Stellar::Transaction.payment(attrs)
+              Hcnet::Transaction.payment(attrs)
             end
 
       tx.to_envelope(from)
@@ -93,7 +93,7 @@ module StellarCoreCommander
       account = get_account account
       funder  = get_account funder
 
-      Stellar::Transaction.create_account({
+      Hcnet::Transaction.create_account({
         account:          funder,
         destination:      account,
         sequence:         next_sequence(funder),
@@ -110,7 +110,7 @@ module StellarCoreCommander
     def change_trust(account, issuer, code, limit)
       account = get_account account
 
-      Stellar::Transaction.change_trust({
+      Hcnet::Transaction.change_trust({
         account:  account,
         sequence: next_sequence(account),
         line:     make_asset([code, issuer]),
@@ -125,7 +125,7 @@ module StellarCoreCommander
       trustor = get_account trustor
 
 
-      Stellar::Transaction.allow_trust({
+      Hcnet::Transaction.allow_trust({
         account:  account,
         sequence: next_sequence(account),
         asset: asset,
@@ -145,7 +145,7 @@ module StellarCoreCommander
 
       buying, selling, price, amount = extract_offer(currencies, price, amount)
 
-      Stellar::Transaction.manage_offer({
+      Hcnet::Transaction.manage_offer({
         account:  account,
         sequence: next_sequence(account),
         selling: selling,
@@ -161,7 +161,7 @@ module StellarCoreCommander
 
       buying, selling, price, amount = extract_offer(currencies, price, amount)
 
-      Stellar::Transaction.create_passive_offer({
+      Hcnet::Transaction.create_passive_offer({
         account:  account,
         sequence: next_sequence(account),
         selling: selling,
@@ -210,7 +210,7 @@ module StellarCoreCommander
         params[:signer] = args[:signer]
       end
 
-      tx = Stellar::Transaction.set_options(params)
+      tx = Hcnet::Transaction.set_options(params)
       tx.to_envelope(account)
     end
 
@@ -232,9 +232,9 @@ module StellarCoreCommander
 
     Contract Symbol, SignerSpec, Num => Any
     def add_signer(account, key, weight)
-      sk = Stellar::SignerKey.new :signer_key_type_ed25519, key.raw_public_key
+      sk = Hcnet::SignerKey.new :signer_key_type_ed25519, key.raw_public_key
 
-      set_options account, signer: Stellar::Signer.new({
+      set_options account, signer: Hcnet::Signer.new({
         key:    sk,
         weight: weight
       })
@@ -247,8 +247,8 @@ module StellarCoreCommander
 
     Contract Symbol, String, Num => Any
     def add_onetime_signer(account, preimage, weight)
-      set_options account, signer: Stellar::Signer.new({
-        key:    Stellar::SignerKey.onetime_signer(preimage),
+      set_options account, signer: Hcnet::Signer.new({
+        key:    Hcnet::SignerKey.onetime_signer(preimage),
         weight: weight
       })
     end
@@ -278,7 +278,7 @@ module StellarCoreCommander
       account = get_account account
       into    = get_account into
 
-      tx = Stellar::Transaction.account_merge({
+      tx = Hcnet::Transaction.account_merge({
         account:     account,
         sequence:    next_sequence(account),
         destination: into,
@@ -292,7 +292,7 @@ module StellarCoreCommander
     def inflation(account=:master)
       account = get_account account
 
-      tx = Stellar::Transaction.inflation({
+      tx = Hcnet::Transaction.inflation({
         account:     account,
         sequence:    next_sequence(account),
       })
@@ -305,7 +305,7 @@ module StellarCoreCommander
     def set_data(account, name, value)
       account = get_account account
 
-      tx = Stellar::Transaction.manage_data({
+      tx = Hcnet::Transaction.manage_data({
         account:  account,
         sequence: next_sequence(account),
         name:     name,
@@ -320,7 +320,7 @@ module StellarCoreCommander
     def clear_data(account, name)
       account = get_account account
 
-      tx = Stellar::Transaction.manage_data({
+      tx = Hcnet::Transaction.manage_data({
         account:  account,
         sequence: next_sequence(account),
         name:     name,
@@ -332,7 +332,7 @@ module StellarCoreCommander
     Contract Symbol, Num => Any
     def bump_sequence(account, sequence)
       account = get_account account
-      Stellar::Transaction.bump_sequence({
+      Hcnet::Transaction.bump_sequence({
         account:  account,
         sequence: next_sequence(account),
         bump_to: sequence
@@ -344,7 +344,7 @@ module StellarCoreCommander
     delegate :get_account, to: :@transactor
     delegate :next_sequence, to: :@transactor
 
-    Contract Asset => StellarBaseAsset
+    Contract Asset => HcnetBaseAsset
     def make_asset(input)
       if input == :native
         return [:native]
@@ -358,7 +358,7 @@ module StellarCoreCommander
 
     def make_account_flags(flags=nil)
       flags ||= []
-      flags.map{|f| Stellar::AccountFlags.send(f)}
+      flags.map{|f| Hcnet::AccountFlags.send(f)}
     end
 
     Contract Thresholds => String
@@ -376,7 +376,7 @@ module StellarCoreCommander
       amount
     end
 
-    Contract OfferCurrencies, Or[String,Num], Or[String,Num] => [StellarBaseAsset, StellarBaseAsset, Or[String,Num], Or[String,Num]]
+    Contract OfferCurrencies, Or[String,Num], Or[String,Num] => [HcnetBaseAsset, HcnetBaseAsset, Or[String,Num], Or[String,Num]]
     def extract_offer(currencies, price, amount)
       if currencies.has_key?(:sell)
         buying = make_asset currencies[:for]

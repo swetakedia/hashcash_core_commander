@@ -1,4 +1,4 @@
-module StellarCoreCommander
+module HcnetCoreCommander
 
   class LocalProcess < Process
     include Contracts
@@ -10,7 +10,7 @@ module StellarCoreCommander
       $stderr.puts "Warning: Ignoring `atlas` param since LocalProcess doesn't support this." if params[:atlas]
 
       super
-      @stellar_core_bin = params[:stellar_core_bin]
+      @hashcash_core_bin = params[:hashcash_core_bin]
       @database_url     = params[:database].try(:strip)
       @cmd              = Cmd.new(working_dir)
 
@@ -19,20 +19,20 @@ module StellarCoreCommander
 
     Contract None => Any
     def forcescp
-      res = @cmd.run_and_redirect "./stellar-core", ["--forcescp"]
+      res = @cmd.run_and_redirect "./hcnet-core", ["--forcescp"]
       raise "Could not set --forcescp" unless res.success
     end
 
     Contract None => Any
     def initialize_history
       Dir.mkdir(history_dir) unless File.exists?(history_dir)
-      res = @cmd.run_and_redirect "./stellar-core", ["--newhist", @name.to_s]
+      res = @cmd.run_and_redirect "./hcnet-core", ["--newhist", @name.to_s]
       raise "Could not initialize history" unless res.success
     end
 
     Contract None => Any
     def initialize_database
-      res = @cmd.run_and_redirect "./stellar-core", ["--newdb"]
+      res = @cmd.run_and_redirect "./hcnet-core", ["--newdb"]
       raise "Could not initialize db" unless res.success
     end
 
@@ -50,7 +50,7 @@ module StellarCoreCommander
 
     Contract None => Any
     def write_config
-      IO.write("#{@working_dir}/stellar-core.cfg", config)
+      IO.write("#{@working_dir}/hcnet-core.cfg", config)
     end
 
     Contract None => String
@@ -69,7 +69,7 @@ module StellarCoreCommander
     Contract None => Num
     def launch_process
       forcescp if @forcescp
-      launch_stellar_core
+      launch_hashcash_core
     end
 
 
@@ -125,14 +125,14 @@ module StellarCoreCommander
     end
 
     private
-    def launch_stellar_core
+    def launch_hashcash_core
       Dir.chdir @working_dir do
-        @pid = ::Process.spawn("./stellar-core",
+        @pid = ::Process.spawn("./hcnet-core",
                                :out => "stdout.txt",
                                :err => "stderr.txt")
         @wait = Thread.new {
           @wait_value = ::Process.wait(@pid);
-          $stderr.puts "stellar-core process exited: #{@wait_value}"
+          $stderr.puts "hcnet-core process exited: #{@wait_value}"
         }
       end
       @pid
@@ -203,18 +203,18 @@ module StellarCoreCommander
     end
 
     def setup_working_dir
-      if @stellar_core_bin.blank?
-        search = `which stellar-core`.strip
+      if @hashcash_core_bin.blank?
+        search = `which hcnet-core`.strip
 
         if $?.success?
-          @stellar_core_bin = search
+          @hashcash_core_bin = search
         else
-          $stderr.puts "Could not find a `stellar-core` binary, please use --stellar-core-bin to specify"
+          $stderr.puts "Could not find a `hcnet-core` binary, please use --hcnet-core-bin to specify"
           exit 1
         end
       end
 
-      FileUtils.cp(@stellar_core_bin, "#{working_dir}/stellar-core")
+      FileUtils.cp(@hashcash_core_bin, "#{working_dir}/hcnet-core")
     end
 
   end

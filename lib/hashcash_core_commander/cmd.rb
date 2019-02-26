@@ -1,4 +1,4 @@
-module StellarCoreCommander
+module HcnetCoreCommander
   class Cmd
     include Contracts
 
@@ -19,8 +19,8 @@ module StellarCoreCommander
     Contract String, ArrayOf[String] => CmdResult
     def run_and_redirect(cmd, args)
       args += [{
-          out: ["stellar-core.out.log", "a"],
-          err: ["stellar-core.err.log", "a"],
+          out: ["hcnet-core.out.log", "a"],
+          err: ["hcnet-core.err.log", "a"],
         }]
 
       Dir.chdir @working_dir do

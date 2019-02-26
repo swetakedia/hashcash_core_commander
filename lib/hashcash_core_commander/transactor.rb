@@ -1,9 +1,9 @@
 require 'fileutils'
-module StellarCoreCommander
+module HcnetCoreCommander
 
 
   #
-  # A transactor plays transactions against a stellar-core test node.
+  # A transactor plays transactions against a hcnet-core test node.
   #
   #
   class Transactor
@@ -22,7 +22,7 @@ module StellarCoreCommander
       @transaction_builder = TransactionBuilder.new(self)
       @manual_close      = false
 
-      account :master, Stellar::KeyPair.master
+      account :master, Hcnet::KeyPair.master
     end
 
     def require_process_running
@@ -94,7 +94,7 @@ module StellarCoreCommander
 
 
     #
-    # @see StellarCoreCommander::TransactionBuilder#payment
+    # @see HcnetCoreCommander::TransactionBuilder#payment
     def payment(*args, &block)
       require_process_running
       envelope = @transaction_builder.payment(*args)
@@ -109,74 +109,74 @@ module StellarCoreCommander
       end
     end
 
-    # @see StellarCoreCommander::TransactionBuilder#create_account
+    # @see HcnetCoreCommander::TransactionBuilder#create_account
     recipe_step :create_account
 
-    # @see StellarCoreCommander::TransactionBuilder#trust
+    # @see HcnetCoreCommander::TransactionBuilder#trust
     recipe_step :trust
 
-    # @see StellarCoreCommander::TransactionBuilder#change_trust
+    # @see HcnetCoreCommander::TransactionBuilder#change_trust
     recipe_step :change_trust
 
-    # @see StellarCoreCommander::TransactionBuilder#offer
+    # @see HcnetCoreCommander::TransactionBuilder#offer
     recipe_step :offer
 
-    # @see StellarCoreCommander::TransactionBuilder#passive_offer
+    # @see HcnetCoreCommander::TransactionBuilder#passive_offer
     recipe_step :passive_offer
 
-    # @see StellarCoreCommander::TransactionBuilder#set_options
+    # @see HcnetCoreCommander::TransactionBuilder#set_options
     recipe_step :set_options
 
-    # @see StellarCoreCommander::TransactionBuilder#set_flags
+    # @see HcnetCoreCommander::TransactionBuilder#set_flags
     recipe_step :set_flags
 
-    # @see StellarCoreCommander::TransactionBuilder#clear_flags
+    # @see HcnetCoreCommander::TransactionBuilder#clear_flags
     recipe_step :clear_flags
 
-    # @see StellarCoreCommander::TransactionBuilder#require_trust_auth
+    # @see HcnetCoreCommander::TransactionBuilder#require_trust_auth
     recipe_step :require_trust_auth
 
-    # @see StellarCoreCommander::TransactionBuilder#add_signer
+    # @see HcnetCoreCommander::TransactionBuilder#add_signer
     recipe_step :add_signer
 
-    # @see StellarCoreCommander::TransactionBuilder#remove_signer
+    # @see HcnetCoreCommander::TransactionBuilder#remove_signer
     recipe_step :remove_signer
 
-    # @see StellarCoreCommander::TransactionBuilder#add_onetime_signer
+    # @see HcnetCoreCommander::TransactionBuilder#add_onetime_signer
     recipe_step :add_onetime_signer
 
-    # @see StellarCoreCommander::TransactionBuilder#set_master_signer_weight
+    # @see HcnetCoreCommander::TransactionBuilder#set_master_signer_weight
     recipe_step :set_master_signer_weight
 
 
-    # @see StellarCoreCommander::TransactionBuilder#set_thresholds
+    # @see HcnetCoreCommander::TransactionBuilder#set_thresholds
     recipe_step :set_thresholds
 
-    # @see StellarCoreCommander::TransactionBuilder#set_inflation_dest
+    # @see HcnetCoreCommander::TransactionBuilder#set_inflation_dest
     recipe_step :set_inflation_dest
 
-    # @see StellarCoreCommander::TransactionBuilder#set_home_domain
+    # @see HcnetCoreCommander::TransactionBuilder#set_home_domain
     recipe_step :set_home_domain
 
-    # @see StellarCoreCommander::TransactionBuilder#allow_trust
+    # @see HcnetCoreCommander::TransactionBuilder#allow_trust
     recipe_step :allow_trust
 
-    # @see StellarCoreCommander::TransactionBuilder#revoke_trust
+    # @see HcnetCoreCommander::TransactionBuilder#revoke_trust
     recipe_step :revoke_trust
 
-    # @see StellarCoreCommander::TransactionBuilder#merge_account
+    # @see HcnetCoreCommander::TransactionBuilder#merge_account
     recipe_step :merge_account
 
-    # @see StellarCoreCommander::TransactionBuilder#inflation
+    # @see HcnetCoreCommander::TransactionBuilder#inflation
     recipe_step :inflation
 
-    # @see StellarCoreCommander::TransactionBuilder#set_data
+    # @see HcnetCoreCommander::TransactionBuilder#set_data
     recipe_step :set_data
 
-    # @see StellarCoreCommander::TransactionBuilder#clear_data
+    # @see HcnetCoreCommander::TransactionBuilder#clear_data
     recipe_step :clear_data
 
-    # @see StellarCoreCommander::OperationBuilder#bump_sequence
+    # @see HcnetCoreCommander::OperationBuilder#bump_sequence
     recipe_step :bump_sequence
 
     Contract None => Any
@@ -341,7 +341,7 @@ module StellarCoreCommander
       raise "Ran out of retries while waiting for success"
     end
 
-    Contract Stellar::KeyPair => Num
+    Contract Hcnet::KeyPair => Num
     def next_sequence(account)
       require_process_running
       base_sequence  = @process.sequence_for(account)
@@ -350,7 +350,7 @@ module StellarCoreCommander
       base_sequence + inflight_count + 1
     end
 
-    Contract Or[Symbol, Stellar::KeyPair] => Bool
+    Contract Or[Symbol, Hcnet::KeyPair] => Bool
     def account_created(account)
       require_process_running
       if account.is_a?(Symbol)
@@ -364,7 +364,7 @@ module StellarCoreCommander
       end
     end
 
-    Contract Or[Symbol, Stellar::KeyPair] => Num
+    Contract Or[Symbol, Hcnet::KeyPair] => Num
     def balance(account)
       require_process_running
       if account.is_a?(Symbol)
@@ -429,7 +429,7 @@ module StellarCoreCommander
 
     private
 
-    Contract Stellar::TransactionEnvelope, Or[nil, Proc] => Any
+    Contract Hcnet::TransactionEnvelope, Or[nil, Proc] => Any
     def submit_transaction(envelope, &after_confirmation)
       require_process_running
       b64    = envelope.to_xdr(:base64)
@@ -441,11 +441,11 @@ module StellarCoreCommander
       @process.unverified << [envelope, after_confirmation]
     end
 
-    Contract Stellar::TransactionEnvelope => Stellar::TransactionResult
+    Contract Hcnet::TransactionEnvelope => Hcnet::TransactionResult
     def validate_transaction(envelope)
       raw_hash = envelope.tx.hash
       hex_hash = Convert.to_hex(raw_hash)
-      base64_envelope = Convert.to_base64(Stellar::TransactionEnvelope.to_xdr(envelope))
+      base64_envelope = Convert.to_base64(Hcnet::TransactionEnvelope.to_xdr(envelope))
 
       base64_result = @process.transaction_result(hex_hash)
 
@@ -453,12 +453,12 @@ module StellarCoreCommander
 
       raw_result = Convert.from_base64(base64_result)
 
-      pair = Stellar::TransactionResultPair.from_xdr(raw_result)
+      pair = Hcnet::TransactionResultPair.from_xdr(raw_result)
       result = pair.result
 
       if not @commander.process_options[:allow_failed_transactions]
         # ensure success for every operation
-        expected = Stellar::TransactionResultCode.tx_success
+        expected = Hcnet::TransactionResultCode.tx_success
         actual = result.result.code
         raise "tx: #{hex_hash} #{base64_envelope} transaction failed: #{base64_result}" unless expected == actual
       end

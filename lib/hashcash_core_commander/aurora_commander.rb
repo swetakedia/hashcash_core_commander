@@ -1,9 +1,9 @@
 require 'typhoeus'
 require 'typhoeus/adapters/faraday'
 
-module StellarCoreCommander
+module HcnetCoreCommander
 
-  class HorizonCommander
+  class AuroraCommander
     include Contracts
     include Concerns::NamedObjects
     include Concerns::TracksAccounts
@@ -20,7 +20,7 @@ module StellarCoreCommander
       end
 
       @transaction_builder = TransactionBuilder.new(self)
-      account :master, Stellar::KeyPair.master
+      account :master, Hcnet::KeyPair.master
     end
 
     Contract None => Any
@@ -115,7 +115,7 @@ module StellarCoreCommander
     delegate :next_sequence, to: :@sequences
 
 
-    Contract Stellar::KeyPair => Num
+    Contract Hcnet::KeyPair => Num
     def sequence_for(account)
       resp = Typhoeus.get("#{@endpoint}/accounts/#{account.address}")
       raise "couldn't get sequence for #{account.address}" unless resp.success?
@@ -129,21 +129,21 @@ module StellarCoreCommander
       @open << @conn.get("friendbot", addr: account.address)
     end
 
-    Contract None => Stellar::Client
+    Contract None => Hcnet::Client
     def sdk_client 
-      @client ||= Stellar::Client.new(horizon: @endpoint)
+      @client ||= Hcnet::Client.new(aurora: @endpoint)
     end
 
     Contract Symbol => Hyperclient::Resource
     def get_account_info(name)
-      sdk_account = Stellar::Account.new(get_account(name))
+      sdk_account = Hcnet::Account.new(get_account(name))
       sdk_client.account_info(sdk_account)
     end
 
     private
 
 
-    Contract Stellar::TransactionEnvelope, Or[nil, Proc] => Any
+    Contract Hcnet::TransactionEnvelope, Or[nil, Proc] => Any
     def submit_transaction(envelope, &after_confirmation)
       b64 = envelope.to_xdr(:base64)
       @open << @conn.post("transactions", tx: b64)

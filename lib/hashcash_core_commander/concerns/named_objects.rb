@@ -1,5 +1,5 @@
 
-module StellarCoreCommander
+module HcnetCoreCommander
   module Concerns
     module NamedObjects
       include Contracts

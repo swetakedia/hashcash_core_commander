@@ -1,5 +1,5 @@
 
-module StellarCoreCommander
+module HcnetCoreCommander
   class SequenceTracker
     include Contracts
   
@@ -14,7 +14,7 @@ module StellarCoreCommander
       @data = {}
     end
 
-    Contract Stellar::KeyPair => Num
+    Contract Hcnet::KeyPair => Num
     def next_sequence(kp)
       current = @data[kp.address] || @provider.sequence_for(kp)
       nexts = current + 1

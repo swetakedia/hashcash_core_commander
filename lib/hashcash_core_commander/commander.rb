@@ -1,9 +1,9 @@
 require 'fileutils'
 
-module StellarCoreCommander
+module HcnetCoreCommander
 
   #
-  # Commander is the object that manages running stellar-core processes.  It is
+  # Commander is the object that manages running hcnet-core processes.  It is
   # responsible for creating and cleaning Process objects
   #
   class Commander
@@ -41,7 +41,7 @@ module StellarCoreCommander
         working_dir:  working_dir,
         name:         name,
         base_port:    @base_port + @processes.map(&:required_ports).sum,
-        identity:     Stellar::KeyPair.random,
+        identity:     Hcnet::KeyPair.random,
         quorum:       quorum,
         manual_close: transactor.manual_close
       }).merge(options)

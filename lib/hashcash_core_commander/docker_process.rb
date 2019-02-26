@@ -2,7 +2,7 @@ require 'uri'
 require 'set'
 require 'securerandom'
 
-module StellarCoreCommander
+module HcnetCoreCommander
 
   class DockerProcess < Process
     include Contracts
@@ -20,11 +20,11 @@ module StellarCoreCommander
       @docker_pull  = params[:docker_pull]
       super
 
-      @heka_container = Container.new(@cmd, docker_args, "stellar/heka", heka_container_name)
+      @heka_container = Container.new(@cmd, docker_args, "hashcash/heka", heka_container_name)
       @state_container = Container.new(@cmd, docker_args, params[:docker_state_image], state_container_name) do
         dump_database
       end
-      @stellar_core_container = Container.new(@cmd, docker_args, params[:docker_core_image], container_name) do
+      @hashcash_core_container = Container.new(@cmd, docker_args, params[:docker_core_image], container_name) do
         dump_data
       end
 
@@ -45,7 +45,7 @@ module StellarCoreCommander
     Contract None => Any
     def launch_state_container
       $stderr.puts "launching state container #{state_container_name} from image #{@state_container.image}"
-      @state_container.launch(%W(-p #{postgres_port}:5432 --env-file stellar-core.env),
+      @state_container.launch(%W(-p #{postgres_port}:5432 --env-file hcnet-core.env),
        %W(postgres --fsync=off --full_page_writes=off --shared_buffers=512MB --work_mem=32MB))
     end
 
@@ -61,12 +61,12 @@ module StellarCoreCommander
 
     Contract None => Any
     def shutdown_core_container
-      @stellar_core_container.shutdown
+      @hashcash_core_container.shutdown
     end
 
     Contract None => Any
     def write_config
-      IO.write("#{working_dir}/stellar-core.env", config)
+      IO.write("#{working_dir}/hcnet-core.env", config)
     end
 
     Contract None => Any
@@ -75,7 +75,7 @@ module StellarCoreCommander
 
       launch_state_container
       wait_for_port postgres_port
-      launch_stellar_core true
+      launch_hashcash_core true
       launch_heka_container if atlas
 
       at_exit do
@@ -89,17 +89,17 @@ module StellarCoreCommander
         raise "setup did not complete before timeout of #{@setup_timeout}" if counter == 0
         sleep 1.0
       end
-      @stellar_core_container.shutdown
+      @hashcash_core_container.shutdown
     end
 
     Contract None => Any
     def launch_process
-      launch_stellar_core false
+      launch_hashcash_core false
     end
 
     Contract None => Bool
     def running?
-      @stellar_core_container.running?
+      @hashcash_core_container.running?
     end
 
     Contract None => Bool
@@ -142,17 +142,17 @@ module StellarCoreCommander
     def upgrade(params)
       stop
 
-      @stellar_core_container.image = params[:docker_core_image]
+      @hashcash_core_container.image = params[:docker_core_image]
       @forcescp = params.fetch(:forcescp, @forcescp)
       $stderr.puts "upgrading docker-core-image to #{docker_core_image}"
-      launch_stellar_core false
+      launch_hashcash_core false
       @await_sync = true
       wait_for_ready
     end
 
     Contract None => Any
     def dump_logs
-      @stellar_core_container.logs
+      @hashcash_core_container.logs
     end
 
     Contract None => Any
@@ -174,7 +174,7 @@ module StellarCoreCommander
 
     Contract None => Any
     def dump_cores
-      @stellar_core_container.dump_cores
+      @hashcash_core_container.dump_cores
     end
 
     Contract None => Any
@@ -189,7 +189,7 @@ module StellarCoreCommander
     Contract None => String
     def default_database_url
       @database_password ||= SecureRandom.hex
-      "postgres://postgres:#{@database_password}@#{docker_host}:#{postgres_port}/stellar"
+      "postgres://postgres:#{@database_password}@#{docker_host}:#{postgres_port}/hashcash"
     end
 
     Contract None => Num
@@ -328,22 +328,22 @@ module StellarCoreCommander
       $stderr.puts "preparing #{idname} (dir:#{working_dir})"
       return unless docker_pull?
       @state_container.pull
-      @stellar_core_container.pull
+      @hashcash_core_container.pull
       @heka_container.pull
     end
 
     def crash
-      @stellar_core_container.exec %W(pkill -ABRT stellar-core)
+      @hashcash_core_container.exec %W(pkill -ABRT hcnet-core)
     end
 
     private
-    def launch_stellar_core fresh
-      $stderr.puts "launching stellar-core container #{container_name} from image #{@stellar_core_container.image}"
+    def launch_hashcash_core fresh
+      $stderr.puts "launching hcnet-core container #{container_name} from image #{@hashcash_core_container.image}"
       args = %W(--volumes-from #{state_container_name})
       args += aws_credentials_volume
       args += shared_history_volume
       args += %W(-p #{http_port}:#{http_port} -p #{peer_port}:#{peer_port})
-      args += %W(--env-file stellar-core.env)
+      args += %W(--env-file hcnet-core.env)
       command = %W(/start #{@name})
       if fresh
         command += ["fresh", "skipstart"]
@@ -351,13 +351,13 @@ module StellarCoreCommander
       if @forcescp
         command += ["forcescp"]
       end
-      # must be added last, as this is requirement of stellar/stellar-core docker image
+      # must be added last, as this is requirement of hashcash/hcnet-core docker image
       if fresh and @initial_catchup
         command += ["catchupat", "current"]
       end
 
-      @stellar_core_container.launch(args, command)
-      @stellar_core_container
+      @hashcash_core_container.launch(args, command)
+      @hashcash_core_container
     end
 
     Contract None => String

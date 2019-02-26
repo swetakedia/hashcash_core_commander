@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'stellar_core_commander'
-require 'stellar-base'
+require 'hashcash_core_commander'
+require 'hashcash-base'
 require 'slop'
 require 'tmpdir'
 
@@ -14,14 +14,14 @@ def run
   $opts = Slop.parse(ARGV, :help => true) do
     banner 'Usage: scc -r RECIPE'
 
-    on 'stellar-core-bin',
-      'a path to a stellar-core executable (defaults to `which stellar-core`)',
+    on 'hcnet-core-bin',
+      'a path to a hcnet-core executable (defaults to `which hcnet-core`)',
       argument: true
     on 'r', 'recipe',
       'a recipe file',
       argument: true
     on 'p', 'process',
-      'method for running stellar-core',
+      'method for running hcnet-core',
       argument: true,
       default: 'local'
     on 'w', 'wait',
@@ -29,13 +29,13 @@ def run
       argument: false,
       default: false
     on 'docker-core-image',
-      'docker image to use for stellar-core',
+      'docker image to use for hcnet-core',
       argument: true,
-      default: 'stellar/stellar-core'
+      default: 'hashcash/hcnet-core'
     on 'docker-state-image',
       'docker image to use for state',
       argument: true,
-      default: 'stellar/stellar-core-state'
+      default: 'hashcash/hcnet-core-state'
     on 'docker-pull',
       'docker pull images before use',
       default: false
@@ -56,9 +56,9 @@ def run
       argument: false,
       default: false
     on 's3-history-prefix',
-      's3 prefix to store temp history in (default: subdir of s3://history-stg.stellar.org/dev/scc)',
+      's3 prefix to store temp history in (default: subdir of s3://history-stg.hashcash.org/dev/scc)',
       argument: true,
-      default: "s3://history-stg.stellar.org/dev/scc/#{Time.now.to_i}-#{rand 100000}"
+      default: "s3://history-stg.hashcash.org/dev/scc/#{Time.now.to_i}-#{rand 100000}"
     on 's3-history-region',
       's3 region to store temp history in (default: eu-west-1)',
       argument: true,
@@ -70,7 +70,7 @@ def run
     on 'network-passphrase',
       'sets the network passphrase to configure on all running processes',
       argument: true,
-      default: Stellar::Networks::TESTNET
+      default: Hcnet::Networks::TESTNET
     on 'base-port',
       'all processes created by scc will use ports starting from base-port',
       argument: true,
@@ -81,13 +81,13 @@ def run
       default: false
   end
 
-  Stellar::default_network = $opts[:"network-passphrase"]
+  Hcnet::default_network = $opts[:"network-passphrase"]
 
   recipe    = load_recipe
   commander = make_commander
 
   #run recipe
-  transactor = StellarCoreCommander::Transactor.new(commander)
+  transactor = HcnetCoreCommander::Transactor.new(commander)
 
   #run the recipe
   $stdout.puts "running recipe"
@@ -112,7 +112,7 @@ end
 
 def make_commander
   opts = {
-    stellar_core_bin: $opts[:"stellar-core-bin"],
+    hashcash_core_bin: $opts[:"hcnet-core-bin"],
     docker_core_image: $opts[:"docker-core-image"],
     docker_state_image: $opts[:"docker-state-image"],
     docker_pull: $opts[:"docker-pull"],
@@ -134,7 +134,7 @@ def make_commander
     clean_up_destination = true
   end
 
-  StellarCoreCommander::Commander.new($opts[:"process"], $opts[:"base-port"].to_i, destination, opts).tap do |c|
+  HcnetCoreCommander::Commander.new($opts[:"process"], $opts[:"base-port"].to_i, destination, opts).tap do |c|
     c.cleanup_at_exit!(clean_up_destination)
   end
 end

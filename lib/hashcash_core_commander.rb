@@ -1,7 +1,7 @@
-require "stellar_core_commander/version"
+require "hashcash_core_commander/version"
 require "active_support/all"
-require "stellar-base"
-require "stellar-sdk"
+require "hashcash-base"
+require "hashcash-sdk"
 require "contracts"
 require "faraday"
 require "faraday_middleware"
@@ -10,7 +10,7 @@ require "sequel"
 require "pg"
 require "uri"
 
-module StellarCoreCommander
+module HashcashCoreCommander
   extend ActiveSupport::Autoload
 
   autoload :Commander
@@ -27,7 +27,7 @@ module StellarCoreCommander
 
   autoload :Convert
 
-  autoload :HorizonCommander
+  autoload :AuroraCommander
   autoload :SequenceTracker
 
   module Concerns

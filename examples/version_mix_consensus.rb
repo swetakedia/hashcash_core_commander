@@ -33,7 +33,7 @@ end
 on :newnode1 do
   $stderr.puts "newnode1 bob balance: #{(balance :bob)}"
   $stderr.puts "newnode1 alice balance: #{(balance :alice)}"
-  raise if (balance :bob) != (base_balance + (1000 * Stellar::ONE))
+  raise if (balance :bob) != (base_balance + (1000 * Hcnet::ONE))
   payment :master, :alice, [:native, 1000]
   close_ledger
   check_integrity_against :oldnode1
@@ -43,7 +43,7 @@ end
 on :oldnode1 do
   $stderr.puts "oldnode1 bob balance: #{(balance :bob)}"
   $stderr.puts "oldnode1 alice balance: #{(balance :alice)}"
-  raise if (balance :alice) != (base_balance + (1000 * Stellar::ONE))
+  raise if (balance :alice) != (base_balance + (1000 * Hcnet::ONE))
   check_integrity_against :newnode1
   check_integrity_against :newnode2
 end

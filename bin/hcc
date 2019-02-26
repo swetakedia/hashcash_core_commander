@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'stellar_core_commander'
-require 'stellar-base'
+require 'hashcash_core_commander'
+require 'hashcash-base'
 require 'slop'
 
 def run
@@ -16,14 +16,14 @@ def run
     on 'H', 'host',
       'sets the network passphrase to configure on all running processes',
       argument: true,
-      default: "https://horizon-testnet.stellar.org" 
+      default: "https://aurora-testnet.hashcash.org" 
     on 'network-passphrase',
       'sets the network passphrase to configure on all running processes',
       argument: true,
-      default: Stellar::Networks::TESTNET
+      default: Hcnet::Networks::TESTNET
   end
 
-  Stellar::default_network = $opts[:"network-passphrase"]
+  Hcnet::default_network = $opts[:"network-passphrase"]
 
   commander = make_commander
 
@@ -37,7 +37,7 @@ end
 
 
 def make_commander
-  StellarCoreCommander::HorizonCommander.new $opts[:host]
+  HcnetCoreCommander::AuroraCommander.new $opts[:host]
 end
 
 def load_recipe

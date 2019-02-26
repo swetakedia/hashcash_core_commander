@@ -2,7 +2,7 @@ require 'uri'
 require 'set'
 require 'securerandom'
 
-module StellarCoreCommander
+module HcnetCoreCommander
 
   class Container
     include Contracts
