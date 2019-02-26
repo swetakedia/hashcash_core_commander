@@ -1,9 +1,9 @@
 # StellarCoreCommander
 
-A helper gem for scripting a [stellar-core](https://github.com/stellar/stellar-core).  This gem provides a system of creating isolated test networks into which you can play
+A helper gem for scripting a [hashcash-core](https://github.com/stellar/stellar-core).  This gem provides a system of creating isolated test networks into which you can play
 transactions and record results.
 
-The motivation for this project comes from the testing needs of [horizon](https://github.com/stellar/horizon).  Horizon uses `scc` to record the various testing scenarios that its suite uses.
+The motivation for this project comes from the testing needs of [horizon](https://github.com/hashcash/horizon).  Horizon uses `scc` to record the various testing scenarios that its suite uses.
 
 
 ## Installation
@@ -11,7 +11,7 @@ The motivation for this project comes from the testing needs of [horizon](https:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'stellar_core_commander'
+gem 'hashcash_core_commander'
 ```
 
 And then execute:
@@ -20,7 +20,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install stellar_core_commander
+    $ gem install hashcash_core_commander
 
 ## Assumptions about environment
 
@@ -30,13 +30,13 @@ At present `scc` makes a few assumptions about the environment it runs in that y
 2.  The `which` command is available on your system.
 3.  Postgresql is running and the current user has passwordless access to it.  Running `psql postgres -c "\l"` should confirm you're setup correctly.
 4.  Your current user has access to create and drop postgres databases.  Test using: `createdb foobar && dropdb foobar`
-5.  A working `stellar-core` binary is available on your path (or specified using the `--stellar-core-bin` flag)
+5.  A working `hashcash-core` binary is available on your path (or specified using the `--stellar-core-bin` flag)
 6.  Your system has libsodium installed
 
 
 ## Usage As Command Line Tool
 
-Installing `stellar_core_commander` installs the command line tool `scc`. `scc`
+Installing `hashcash_core_commander` installs the command line tool `scc`. `scc`
 takes a recipe file, spins up a test network, plays the defined transactions against it, then dumps the ledger database to stdout.  `scc`'s usage is like so:
 
 ```bash
@@ -67,7 +67,7 @@ The next statement is more complex: `payment :master, :scott, [:native, 1000_000
 
 ### Recipe Reference
 
-All recipe execute within the context of a `StellarCoreCommander::Transactor`.  [See the code for all available methods](lib/stellar_core_commander/transactor.rb).
+All recipe execute within the context of a `StellarCoreCommander::Transactor`.  [See the code for all available methods](lib/hashcash_core_commander/transactor.rb).
 
 ## Example Recipes
 
@@ -75,7 +75,7 @@ See [examples](examples).
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/stellar_core_commander/fork )
+1. Fork it ( https://github.com/[my-github-username]/hashcash_core_commander/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
